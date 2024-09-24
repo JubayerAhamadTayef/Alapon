@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.alapon.databinding.FragmentLoginBinding
 import com.google.firebase.auth.FirebaseAuth
+import java.util.regex.Pattern
 
 class LoginFragment : Fragment() {
 
@@ -67,11 +68,12 @@ class LoginFragment : Fragment() {
 
     private fun isPasswordValid(password: String): Boolean {
 
-//        val passRegex =
-//            Regex("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\$%^&+=])(?=\\\\S+\$).{4,}\$")
-//        return password.matches(passRegex)
+        val passwordPattern ="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{4,}$"
 
-        return password.length >= 6
+        val pattern = Pattern.compile(passwordPattern)
+        val matcher = pattern.matcher(password)
+
+        return matcher.matches()
 
     }
 
