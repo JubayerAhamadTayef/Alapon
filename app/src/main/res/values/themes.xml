@@ -6,4 +6,15 @@
     </style>
 
     <style name="Theme.Alapon" parent="Base.Theme.Alapon" />
+
+    <style name="textStyle">
+
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textAlignment">center</item>
+
+    </style>
+
 </resources>
