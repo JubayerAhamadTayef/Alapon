@@ -41,6 +41,14 @@ class LoginFragment : Fragment() {
 
                         loginUser(email, password)
 
+                    } else {
+
+                        Toast.makeText(
+                            requireContext(),
+                            "Invalid Email or Password!",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
                     }
 
                 } else {
@@ -68,7 +76,7 @@ class LoginFragment : Fragment() {
 
     private fun isPasswordValid(password: String): Boolean {
 
-        val passwordPattern ="^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{4,}$"
+        val passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{4,}$"
 
         val pattern = Pattern.compile(passwordPattern)
         val matcher = pattern.matcher(password)
