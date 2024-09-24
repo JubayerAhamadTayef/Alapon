@@ -34,4 +34,9 @@
         android:name="com.example.alapon.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.example.alapon.WelcomeFragment"
+        android:label="fragment_welcome"
+        tools:layout="@layout/fragment_welcome" />
 </navigation>
