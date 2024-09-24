@@ -11,10 +11,10 @@
         android:label="fragment_login"
         tools:layout="@layout/fragment_login" >
         <action
-            android:id="@+id/action_loginFragment_to_homeFragment2"
+            android:id="@+id/action_loginFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
         <action
-            android:id="@+id/action_loginFragment_to_signUpFragment2"
+            android:id="@+id/action_loginFragment_to_signUpFragment"
             app:destination="@id/signUpFragment" />
     </fragment>
     <fragment
@@ -23,10 +23,10 @@
         android:label="fragment_sign_up"
         tools:layout="@layout/fragment_sign_up" >
         <action
-            android:id="@+id/action_signUpFragment_to_homeFragment2"
+            android:id="@+id/action_signUpFragment_to_homeFragment"
             app:destination="@id/homeFragment" />
         <action
-            android:id="@+id/action_signUpFragment_to_loginFragment2"
+            android:id="@+id/action_signUpFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
     </fragment>
     <fragment

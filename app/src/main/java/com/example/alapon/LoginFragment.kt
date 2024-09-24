@@ -1,59 +1,107 @@
 package com.example.alapon
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.example.alapon.databinding.FragmentLoginBinding
+import com.google.firebase.auth.FirebaseAuth
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [LoginFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class LoginFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentLoginBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_login, container, false)
+        binding = FragmentLoginBinding.inflate(inflater, container, false)
+
+        binding.apply {
+
+            createNewAccount.setOnClickListener {
+
+                findNavController().navigate(R.id.action_loginFragment_to_signUpFragment)
+
+            }
+
+            loginButton.setOnClickListener {
+
+                if (emailEditText.text?.isNotEmpty() == true && passwordEditText.text?.isNotEmpty() == true) {
+
+                    val email = emailEditText.text.toString().trim()
+                    val password = passwordEditText.text.toString().trim()
+
+                    if (isEmailValid(email) && isPasswordValid(password)) {
+
+                        loginUser(email, password)
+
+                    }
+
+                } else {
+
+                    Toast.makeText(
+                        requireContext(),
+                        "Please, provide needed Information. Then, click again Login Button.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                }
+
+            }
+
+        }
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment LoginFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            LoginFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun isEmailValid(email: String): Boolean {
+
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
     }
+
+    private fun isPasswordValid(password: String): Boolean {
+
+//        val passRegex =
+//            Regex("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#\$%^&+=])(?=\\\\S+\$).{4,}\$")
+//        return password.matches(passRegex)
+
+        return password.length >= 6
+
+    }
+
+    private fun loginUser(email: String, password: String) {
+
+        val auth = FirebaseAuth.getInstance()
+
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
+
+            if (it.isSuccessful) {
+
+                val user = auth.currentUser
+
+                Toast.makeText(
+                    requireContext(),
+                    "Login Successfully, ${user?.email}",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+
+            } else {
+
+                Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT)
+                    .show()
+
+            }
+
+        }
+
+    }
+
 }
