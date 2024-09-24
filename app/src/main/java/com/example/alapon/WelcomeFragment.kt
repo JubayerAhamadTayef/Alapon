@@ -26,6 +26,12 @@ class WelcomeFragment : Fragment() {
 
             }
 
+            signUpButton.setOnClickListener {
+
+                findNavController().navigate(R.id.action_welcomeFragment_to_signUpFragment)
+
+            }
+
         }
 
         return binding.root
