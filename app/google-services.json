@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "44110607013",
+    "project_id": "alapon-579462",
+    "storage_bucket": "alapon-579462.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:44110607013:android:ead83c5d9fb3a3680b134c",
+        "android_client_info": {
+          "package_name": "com.example.alapon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCljCF9DzWHGiw9uClUf6xnVXWajrY_ues"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
