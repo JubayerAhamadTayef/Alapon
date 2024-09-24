@@ -2,4 +2,5 @@
     <string name="app_name">Alapon</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="share_everything">Share everything \non your mind here.</string>
 </resources>
