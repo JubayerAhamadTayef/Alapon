@@ -8,4 +8,12 @@
     <string name="sign_up">Sign Up</string>
     <string name="login_here">Login Here</string>
     <string name="welcome_back">Welcome back. You\'ve \n been missed!</string>
+    <string name="sign_up_here">Sign Up Here</string>
+    <string name="create_an_account_text">Create an Account, so you can share everything \n on your mind</string>
+    <string name="user_name">Enter your User Name here</string>
+    <string name="email">Enter your Email here</string>
+    <string name="password">Enter your Password here</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="forgot_your_password">Forgot your password?</string>
+    <string name="create_new_account">Create new account</string>
 </resources>

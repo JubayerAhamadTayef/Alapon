@@ -51,7 +51,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             android:layout_marginVertical="10dp"
-            android:hint="Enter your Email here"
+            android:hint="@string/email"
             app:startIconDrawable="@drawable/baseline_email_24"
             app:startIconTint="@color/blue">
 
@@ -70,7 +70,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="10dp"
             android:layout_marginVertical="10dp"
-            android:hint="Enter your Password here"
+            android:hint="@string/password"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="@color/blue"
             app:startIconDrawable="@drawable/baseline_lock_24"
@@ -93,7 +93,7 @@
             android:layout_gravity="end"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
-            android:text="Forgot your password?"
+            android:text="@string/forgot_your_password"
             android:textColor="@color/blue" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -117,7 +117,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="10dp"
-            android:text="Create new account" />
+            android:text="@string/create_new_account" />
 
     </LinearLayout>
 
