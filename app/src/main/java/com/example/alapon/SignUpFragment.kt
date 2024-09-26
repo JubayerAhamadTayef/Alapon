@@ -37,14 +37,22 @@ class SignUpFragment : Fragment() {
 
                     } else {
 
-                        Toast.makeText(requireContext(), "Invalid Email or Password!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            requireContext(),
+                            "Invalid Email or Password!",
+                            Toast.LENGTH_SHORT
+                        ).show()
 
                     }
 
 
                 } else {
 
-                    Toast.makeText(requireContext(), "Please, provide needed Information, then click again Sign Up Button.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Please, provide needed Information, then click again Sign Up Button.",
+                        Toast.LENGTH_SHORT
+                    ).show()
 
                 }
 
@@ -82,13 +90,15 @@ class SignUpFragment : Fragment() {
 
             if (it.isSuccessful) {
 
-                Toast.makeText(requireContext(), "Sign Up Successfully, $email", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Sign Up Successfully, $email", Toast.LENGTH_SHORT)
+                    .show()
 
                 findNavController().navigate(R.id.action_signUpFragment_to_homeFragment)
 
             } else {
 
-                Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT)
+                    .show()
 
             }
 
