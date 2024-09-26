@@ -26,7 +26,7 @@ class LoginFragment : Fragment() {
 
             createNewAccount.setOnClickListener {
 
-                findNavController().navigate(R.id.action_welcomeFragment_to_homeFragment)
+                findNavController().navigate(R.id.action_loginFragment_to_signUpFragment)
 
             }
 
