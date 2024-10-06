@@ -60,7 +60,8 @@
                 style="@style/textStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
+                android:inputType="text"
+                android:textAlignment="textStart" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -79,7 +80,8 @@
                 style="@style/textStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:textAlignment="textStart" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -100,7 +102,8 @@
                 style="@style/textStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:textAlignment="textStart" />
 
         </com.google.android.material.textfield.TextInputLayout>
 

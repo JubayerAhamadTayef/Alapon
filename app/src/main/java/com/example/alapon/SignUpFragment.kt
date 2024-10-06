@@ -10,16 +10,22 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.alapon.databinding.FragmentSignUpBinding
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 
 class SignUpFragment : Fragment() {
 
     private lateinit var binding: FragmentSignUpBinding
+
+    private lateinit var userDB: DatabaseReference
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentSignUpBinding.inflate(inflater, container, false)
+
+        userDB = FirebaseDatabase.getInstance().reference
 
         binding.apply {
 
@@ -90,15 +96,43 @@ class SignUpFragment : Fragment() {
 
             if (it.isSuccessful) {
 
-                Toast.makeText(requireContext(), "Sign Up Successfully, $email", Toast.LENGTH_SHORT)
-                    .show()
-
-                findNavController().navigate(R.id.action_signUpFragment_to_homeFragment)
+                saveUserToDatabase(auth.currentUser?.uid, email, userName)
 
             } else {
 
                 Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT)
                     .show()
+
+            }
+
+        }
+
+    }
+
+    private fun saveUserToDatabase(uid: String?, email: String, userName: String) {
+
+        uid?.let {
+
+            val user = User(userId = uid, userName = userName, userEmail = email)
+            userDB.child(DBNODES.USER).child(it).setValue(user).addOnCompleteListener {
+
+                if (it.isSuccessful) {
+
+                    Toast.makeText(
+                        requireContext(),
+                        "Sign Up Successfully, $email",
+                        Toast.LENGTH_SHORT
+                    )
+                        .show()
+
+                    findNavController().navigate(R.id.action_signUpFragment_to_homeFragment)
+
+                } else {
+
+                    Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT)
+                        .show()
+
+                }
 
             }
 
