@@ -22,4 +22,6 @@
     <string name="user_list">User List</string>
     <string name="mdjubayerahamadtayef_gmail_com">mdjubayerahamadtayef@gmail.com</string>
     <string name="i_am_an_android_developer">I am an Android Developer.</string>
+    <string name="enter_your_bio_here">Enter Your Bio Here</string>
+    <string name="update">Update</string>
 </resources>

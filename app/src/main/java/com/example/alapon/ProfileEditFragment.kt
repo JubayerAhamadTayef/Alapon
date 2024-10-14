@@ -4,30 +4,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import com.example.alapon.databinding.FragmentProfileBinding
-import com.google.firebase.auth.FirebaseAuth
+import com.example.alapon.databinding.FragmentProfileEditBinding
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
-class ProfileFragment : Fragment() {
+class ProfileEditFragment : Fragment() {
 
-    private lateinit var binding: FragmentProfileBinding
-
+    private lateinit var binding: FragmentProfileEditBinding
     private lateinit var userDB: DatabaseReference
-
     private var userId = ""
-    private var bundle = Bundle()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentProfileBinding.inflate(inflater, container, false)
+        binding = FragmentProfileEditBinding.inflate(inflater, container, false)
 
         userDB = FirebaseDatabase.getInstance().reference
 
@@ -38,22 +35,22 @@ class ProfileFragment : Fragment() {
 
         }
 
-        FirebaseAuth.getInstance().currentUser?.let {
-            if (it.uid == userId) {
-                binding.letsChatBtn.text = EDIT
-            } else {
-                binding.letsChatBtn.text = CHAT
-            }
-        }
+        binding.saveBtn.setOnClickListener {
 
-        binding.letsChatBtn.setOnClickListener {
+            var userMap: MutableMap<String, Any> = mutableMapOf()
 
-            if (binding.letsChatBtn.text == EDIT) {
-                bundle.putString(USERID, userId)
-                findNavController().navigate(
-                    R.id.action_profileFragment_to_profileEditFragment,
-                    bundle
-                )
+            userMap["userName"] = binding.userName.text.toString().trim()
+            userMap["userBio"] = binding.userBio.text.toString().trim()
+
+            userDB.child(DBNODES.USER).child(userId).updateChildren(userMap).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    Toast.makeText(requireContext(), "Successfully Updated!", Toast.LENGTH_SHORT)
+                        .show()
+                    findNavController().popBackStack(R.id.profileFragment, false)
+                } else {
+                    Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT)
+                        .show()
+                }
             }
 
         }
@@ -61,35 +58,26 @@ class ProfileFragment : Fragment() {
         return binding.root
     }
 
-    companion object {
-        private var EDIT = "Let's Edit"
-        private var CHAT = "Let's Chat"
-        private var USERID = "id"
-    }
-
     private fun getUserById(it: String) {
+
         userDB.child(DBNODES.USER).child(it).addValueEventListener(
             object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     snapshot.getValue(User::class.java)?.let {
-
                         binding.apply {
-
-                            userName.text = it.userName
-                            userEmail.text = it.userEmail
-                            userBio.text = it.userBio
-
+                            userName.setText(it.userName)
+                            userEmail.setText(it.userEmail)
+                            userBio.setText(it.userBio)
                         }
-
                     }
                 }
 
                 override fun onCancelled(error: DatabaseError) {
-
                 }
 
             }
         )
+
     }
 
 }
