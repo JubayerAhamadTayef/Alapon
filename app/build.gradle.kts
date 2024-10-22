@@ -61,4 +61,12 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(libs.circleimageview)
     implementation(libs.coil.compose)
+    implementation(libs.karumi.dexter)
+    //image picker
+    implementation(libs.imagepicker)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.fragment.ktx)
+
+    //glide
+    implementation (libs.glide)
 }

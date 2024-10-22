@@ -39,8 +39,6 @@ class HomeFragment : Fragment(), UserAdapter.ItemClick {
 
         binding.logout.setOnClickListener {
 
-            auth = FirebaseAuth.getInstance()
-
             auth.signOut().apply {
 
                 findNavController().navigate(R.id.action_homeFragment_to_welcomeFragment)
@@ -99,7 +97,11 @@ class HomeFragment : Fragment(), UserAdapter.ItemClick {
 
     private fun setProfile() {
         currentUser?.let {
-            binding.profileBtn.load("https://media.licdn.com/dms/image/v2/D5603AQHS0TTHVz36vg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1725544473563?e=1733356800&v=beta&t=M6aiG2uqLh2jvq-Fav0pQ8HOWm5qy5gZ5Ay8TxG6an8")
+            if (currentUser?.userImage == "User Image" || currentUser?.userImage == "") {
+                binding.profileBtn.setImageResource(R.drawable.baseline_person_24)
+            } else {
+                binding.profileBtn.load(currentUser!!.userImage)
+            }
         }
     }
 

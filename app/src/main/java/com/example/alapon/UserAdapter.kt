@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.example.alapon.databinding.UserItemDesignBinding
 
 class UserAdapter(val itemClick: ItemClick): ListAdapter<User, UserViewHolder> (comparator) {
@@ -27,6 +28,11 @@ class UserAdapter(val itemClick: ItemClick): ListAdapter<User, UserViewHolder> (
                 userName.text = it.userName
                 userEmail.text = it.userEmail
                 userBio.text = it.userBio
+                if (it.userImage == "User Image" || it.userImage == "") {
+                    userImage.setImageResource(R.drawable.baseline_person_24)
+                } else {
+                    userImage.load(it.userImage)
+                }
 
             }
 

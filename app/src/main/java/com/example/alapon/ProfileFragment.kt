@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import coil.load
 import com.example.alapon.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -54,6 +55,11 @@ class ProfileFragment : Fragment() {
                     R.id.action_profileFragment_to_profileEditFragment,
                     bundle
                 )
+            } else {
+                bundle.putString(USERID, userId)
+                findNavController().navigate(
+                    R.id.action_profileFragment_to_chatFragment, bundle
+                )
             }
 
         }
@@ -78,7 +84,11 @@ class ProfileFragment : Fragment() {
                             userName.text = it.userName
                             userEmail.text = it.userEmail
                             userBio.text = it.userBio
-
+                            if (it.userImage == "User Image" || it.userImage == "") {
+                                userImage.setImageResource(R.drawable.baseline_person_24)
+                            } else {
+                                userImage.load(it.userImage)
+                            }
                         }
 
                     }
