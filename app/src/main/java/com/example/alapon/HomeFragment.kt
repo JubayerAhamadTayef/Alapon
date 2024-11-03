@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import coil.load
+import com.bumptech.glide.Glide
 import com.example.alapon.databinding.FragmentHomeBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -97,11 +98,7 @@ class HomeFragment : Fragment(), UserAdapter.ItemClick {
 
     private fun setProfile() {
         currentUser?.let {
-            if (currentUser?.userImage == "User Image" || currentUser?.userImage == "") {
-                binding.profileBtn.setImageResource(R.drawable.baseline_person_24)
-            } else {
-                binding.profileBtn.load(currentUser!!.userImage)
-            }
+            Glide.with(requireContext()).load(currentUser?.userImage).placeholder(R.drawable.image_place_holder).into(binding.profileBtn)
         }
     }
 

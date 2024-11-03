@@ -1,6 +1,7 @@
 package com.example.alapon
 
 import android.app.Activity
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,7 +12,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import coil.load
+import com.bumptech.glide.Glide
 import com.example.alapon.databinding.FragmentProfileEditBinding
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.firebase.database.DataSnapshot
@@ -24,6 +25,7 @@ import com.google.firebase.storage.StorageReference
 
 class ProfileEditFragment : Fragment() {
 
+    private lateinit var context: Context
     private lateinit var binding: FragmentProfileEditBinding
     private lateinit var userDB: DatabaseReference
     private var userId = ""
@@ -37,6 +39,9 @@ class ProfileEditFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        if (isAdded) {
+            context = requireContext()
+        }
         binding = FragmentProfileEditBinding.inflate(inflater, container, false)
 
         userDB = FirebaseDatabase.getInstance().reference
@@ -63,11 +68,11 @@ class ProfileEditFragment : Fragment() {
 
             userDB.child(DBNODES.USER).child(userId).updateChildren(userMap).addOnCompleteListener {
                 if (it.isSuccessful) {
-                    Toast.makeText(requireContext(), "Successfully Updated!", Toast.LENGTH_SHORT)
+                    Toast.makeText(context, "Successfully Updated!", Toast.LENGTH_SHORT)
                         .show()
                     findNavController().popBackStack(R.id.profileFragment, false)
                 } else {
-                    Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT)
+                    Toast.makeText(context, "${it.exception?.message}", Toast.LENGTH_SHORT)
                         .show()
                 }
             }
@@ -83,19 +88,19 @@ class ProfileEditFragment : Fragment() {
     }
 
     private fun uploadImage(userProfileUri: Uri) {
-        val profileStorage: StorageReference =
-            userStorage.child("Images").child(userId).child("Profile Images")
+        var profileStorage: StorageReference =
+            userStorage.child("Images").child(userId).child("Profile-Images")
 
         profileStorage.putFile(userProfileUri).addOnCompleteListener {
             if (it.isSuccessful) {
                 profileStorage.downloadUrl.addOnSuccessListener { data ->
                     imageLink = data.toString()
                     profileUpdateWithImage(imageLink)
-                    Toast.makeText(requireContext(), "Profile Picture Uploaded", Toast.LENGTH_SHORT)
+                    Toast.makeText(context, "Profile Picture Uploaded", Toast.LENGTH_SHORT)
                         .show()
                 }
             } else {
-                Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "${it.exception?.message}", Toast.LENGTH_SHORT)
                     .show()
             }
         }
@@ -109,9 +114,9 @@ class ProfileEditFragment : Fragment() {
 
         userDB.child(DBNODES.USER).child(userId).updateChildren(userMap).addOnCompleteListener {
             if (it.isSuccessful) {
-                Toast.makeText(requireContext(), "Successfully Updated", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Successfully Updated", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(requireContext(), "${it.exception?.message}", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "${it.exception?.message}", Toast.LENGTH_SHORT)
                     .show()
             }
         }
@@ -145,12 +150,12 @@ class ProfileEditFragment : Fragment() {
                 }
 
                 ImagePicker.RESULT_ERROR -> {
-                    Toast.makeText(requireContext(), ImagePicker.getError(data), Toast.LENGTH_SHORT)
+                    Toast.makeText(context, ImagePicker.getError(data), Toast.LENGTH_SHORT)
                         .show()
                 }
 
                 else -> {
-                    Toast.makeText(requireContext(), "Task Cancelled", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Task Cancelled", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -166,11 +171,8 @@ class ProfileEditFragment : Fragment() {
                             userName.setText(it.userName)
                             userEmail.setText(it.userEmail)
                             userBio.setText(it.userBio)
-                            if (it.userImage == "User Image" || it.userImage == "") {
-                                userImage.setImageResource(R.drawable.baseline_person_24)
-                            } else {
-                                userImage.load(it.userImage)
-                            }
+                            Glide.with(context).load(it.userImage)
+                                .placeholder(R.drawable.image_place_holder).into(userImage)
                         }
                     }
                 }

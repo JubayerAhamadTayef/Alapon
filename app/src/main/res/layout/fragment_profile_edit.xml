@@ -12,7 +12,7 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_marginBottom="20dp"
-        android:src="@drawable/my_image" />
+        android:src="@drawable/image_place_holder" />
 
 
     <EditText

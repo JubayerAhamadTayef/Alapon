@@ -1,14 +1,17 @@
 package com.example.alapon
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
+import com.bumptech.glide.Glide
 import com.example.alapon.databinding.UserItemDesignBinding
 
 class UserAdapter(val itemClick: ItemClick): ListAdapter<User, UserViewHolder> (comparator) {
+
+    private lateinit var context: Context
 
     interface ItemClick{
 
@@ -17,6 +20,7 @@ class UserAdapter(val itemClick: ItemClick): ListAdapter<User, UserViewHolder> (
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
+        context = parent.context
         return UserViewHolder(UserItemDesignBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
@@ -28,11 +32,8 @@ class UserAdapter(val itemClick: ItemClick): ListAdapter<User, UserViewHolder> (
                 userName.text = it.userName
                 userEmail.text = it.userEmail
                 userBio.text = it.userBio
-                if (it.userImage == "User Image" || it.userImage == "") {
-                    userImage.setImageResource(R.drawable.baseline_person_24)
-                } else {
-                    userImage.load(it.userImage)
-                }
+                Glide.with(context).load(it.userImage).placeholder(R.drawable.image_place_holder)
+                    .into(userImage)
 
             }
 

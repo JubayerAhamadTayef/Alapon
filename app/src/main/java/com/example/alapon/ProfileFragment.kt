@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import coil.load
+import com.bumptech.glide.Glide
 import com.example.alapon.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -84,11 +84,8 @@ class ProfileFragment : Fragment() {
                             userName.text = it.userName
                             userEmail.text = it.userEmail
                             userBio.text = it.userBio
-                            if (it.userImage == "User Image" || it.userImage == "") {
-                                userImage.setImageResource(R.drawable.baseline_person_24)
-                            } else {
-                                userImage.load(it.userImage)
-                            }
+                            Glide.with(requireContext()).load(it.userImage)
+                                .placeholder(R.drawable.image_place_holder).into(userImage)
                         }
 
                     }
