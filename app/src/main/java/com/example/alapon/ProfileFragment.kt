@@ -1,26 +1,28 @@
 package com.example.alapon
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.alapon.databinding.FragmentProfileBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class ProfileFragment : Fragment() {
 
     private lateinit var binding: FragmentProfileBinding
-
     private lateinit var userDB: DatabaseReference
-
     private var userId = ""
     private var bundle = Bundle()
 
@@ -29,14 +31,11 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentProfileBinding.inflate(inflater, container, false)
-
         userDB = FirebaseDatabase.getInstance().reference
 
         requireArguments().getString("id")?.let {
-
             userId = it
             getUserById(it)
-
         }
 
         FirebaseAuth.getInstance().currentUser?.let {
@@ -48,55 +47,62 @@ class ProfileFragment : Fragment() {
         }
 
         binding.letsChatBtn.setOnClickListener {
-
-            if (binding.letsChatBtn.text == EDIT) {
-                bundle.putString(USERID, userId)
-                findNavController().navigate(
-                    R.id.action_profileFragment_to_profileEditFragment,
-                    bundle
-                )
-            } else {
-                bundle.putString(USERID, userId)
-                findNavController().navigate(
-                    R.id.action_profileFragment_to_chatFragment, bundle
-                )
-            }
-
+            bundle.putString(USERID, userId)
+            findNavController().navigate(
+                if (binding.letsChatBtn.text == EDIT)
+                    R.id.action_profileFragment_to_profileEditFragment
+                else
+                    R.id.action_profileFragment_to_chatFragment,
+                bundle
+            )
         }
 
         return binding.root
     }
 
     companion object {
-        private var EDIT = "Let's Edit"
-        private var CHAT = "Let's Chat"
-        private var USERID = "id"
+        private const val EDIT = "Let's Edit"
+        private const val CHAT = "Let's Chat"
+        private const val USERID = "id"
     }
 
-    private fun getUserById(it: String) {
-        userDB.child(DBNODES.USER).child(it).addValueEventListener(
-            object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.getValue(User::class.java)?.let {
+    @SuppressLint("SetTextI18n")
+    private fun getUserById(userId: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val userSnapshot = withContext(Dispatchers.IO) {
+                    userDB.child(DBNODES.USER).child(userId).get().await()
+                }
 
-                        binding.apply {
+                if (!isAdded) return@launch
 
-                            userName.text = it.userName
-                            userEmail.text = it.userEmail
-                            userBio.text = it.userBio
-                            Glide.with(requireContext()).load(it.userImage)
-                                .placeholder(R.drawable.image_place_holder).into(userImage)
+                userSnapshot.getValue(User::class.java)?.let {
+                    binding.apply {
+                        userName.text = it.userName
+                        userEmail.text = it.userEmail
+                        userBio.text = it.userBio
+                        context?.let { ctx ->
+                            Glide.with(ctx).load(it.userImage)
+                                .placeholder(R.drawable.image_place_holder)
+                                .into(userImage)
                         }
-
                     }
+                } ?: run {
+                    // Handle case where user data is null
+                    binding.userName.text = "Unknown User"
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-
+            } catch (e: Exception) {
+                // Handle exceptions
+                e.printStackTrace()
+                // Show error message or toast
+                context?.let {
+                    Toast.makeText(
+                        it,
+                        "Failed to load user data. Please try again.",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-
             }
-        )
+        }
     }
-
 }

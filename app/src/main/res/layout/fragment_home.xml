@@ -35,16 +35,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <ImageView
-            android:id="@+id/search"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:src="@drawable/baseline_search_24"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/materialCardView"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/white" />
-
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/materialCardView"
             android:layout_width="40dp"

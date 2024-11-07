@@ -69,4 +69,7 @@ dependencies {
 
     //glide
     implementation (libs.glide)
+
+    implementation (libs.kotlinx.coroutines.android)
+    implementation (libs.firebase.database.ktx)
 }

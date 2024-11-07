@@ -8,43 +8,51 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 
-class ChatAdapter(private var userIdSelf: String, private val chatList: MutableList<TextMessage>) :
-    RecyclerView.Adapter<chatViewHolder>(){
+class ChatAdapter(private var userIdSelf: String) : ListAdapter<TextMessage, ChatViewHolder>(ChatDiffCallback()) {
 
-
-    var right = 1
-    var left = 2
-
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): chatViewHolder {
-        if (viewType == right) {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.send_message_item, parent, false)
-            return chatViewHolder(view)
-        } else {
-            val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.receive_message_item, parent, false)
-            return chatViewHolder(view)
-        }
+    companion object {
+        const val VIEW_TYPE_RIGHT = 1
+        const val VIEW_TYPE_LEFT = 2
     }
 
-    override fun onBindViewHolder(holder: chatViewHolder, position: Int) {
-        holder.textMessage.text = chatList[position].textMessage
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
+        val view = if (viewType == VIEW_TYPE_RIGHT) {
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.send_message_item, parent, false)
+        } else {
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.receive_message_item, parent, false)
+        }
+        return ChatViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
+        holder.bind(getItem(position))
     }
 
     override fun getItemViewType(position: Int): Int {
-        if (chatList[position].senderID == userIdSelf) {
-            return right
+        return if (getItem(position).senderID == userIdSelf) {
+            VIEW_TYPE_RIGHT
         } else {
-            return left
+            VIEW_TYPE_LEFT
         }
     }
-
-    override fun getItemCount(): Int = chatList.size
-
 }
 
+class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    private val textMessage: TextView = itemView.findViewById(R.id.textMessage)
 
-class chatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val textMessage: TextView = itemView.findViewById(R.id.textMessage)
+    fun bind(textMessage: TextMessage) {
+        this.textMessage.text = textMessage.textMessage
+    }
+}
+
+class ChatDiffCallback : DiffUtil.ItemCallback<TextMessage>() {
+    override fun areItemsTheSame(oldItem: TextMessage, newItem: TextMessage): Boolean {
+        return oldItem.messageID == newItem.messageID
+    }
+
+    override fun areContentsTheSame(oldItem: TextMessage, newItem: TextMessage): Boolean {
+        return oldItem == newItem
+    }
 }

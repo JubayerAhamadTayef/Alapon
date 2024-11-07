@@ -8,57 +8,65 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.alapon.databinding.UserItemDesignBinding
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
-class UserAdapter(val itemClick: ItemClick): ListAdapter<User, UserViewHolder> (comparator) {
+class UserAdapter(private val itemClick: ItemClick) : ListAdapter<User, UserViewHolder>(comparator) {
 
     private lateinit var context: Context
 
-    interface ItemClick{
-
+    interface ItemClick {
         fun onItemClick(user: User)
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
         context = parent.context
-        return UserViewHolder(UserItemDesignBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        return UserViewHolder(UserItemDesignBinding.inflate(LayoutInflater.from(context), parent, false))
     }
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
-        getItem(position).let {
+        val user = getItem(position)
 
-            holder.binding.apply {
+        holder.binding.apply {
+            userName.text = user.userName
+            userEmail.text = user.userEmail
+            userBio.text = user.userBio
 
-                userName.text = it.userName
-                userEmail.text = it.userEmail
-                userBio.text = it.userBio
-                Glide.with(context).load(it.userImage).placeholder(R.drawable.image_place_holder)
-                    .into(userImage)
-
+            // Using coroutines for image loading
+            CoroutineScope(Dispatchers.Main).launch {
+                loadImage(user.userImage, holder)
             }
 
-            holder.itemView.setOnClickListener { _ ->
-
-                itemClick.onItemClick(it)
-
+            holder.itemView.setOnClickListener {
+                itemClick.onItemClick(user)
             }
+        }
+    }
 
+    private suspend fun loadImage(imageUrl: String, holder: UserViewHolder) {
+        withContext(Dispatchers.Main) {
+            context.let {
+                Glide.with(it)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.image_place_holder)
+                    .into(holder.binding.userImage)
+            }
         }
     }
 
     companion object {
         val comparator = object : DiffUtil.ItemCallback<User>() {
             override fun areItemsTheSame(oldItem: User, newItem: User): Boolean {
-               return oldItem.userId == newItem.userId
+                return oldItem.userId == newItem.userId
             }
 
             override fun areContentsTheSame(oldItem: User, newItem: User): Boolean {
-               return oldItem == newItem
+                return oldItem == newItem
             }
-
         }
     }
-
 }
 
-class UserViewHolder(val binding: UserItemDesignBinding): RecyclerView.ViewHolder(binding.root)
+class UserViewHolder(val binding: UserItemDesignBinding) : RecyclerView.ViewHolder(binding.root)

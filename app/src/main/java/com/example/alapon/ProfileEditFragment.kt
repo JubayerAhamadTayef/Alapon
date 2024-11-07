@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.example.alapon.databinding.FragmentProfileEditBinding
@@ -22,15 +23,18 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class ProfileEditFragment : Fragment() {
 
-    private lateinit var context: Context
     private lateinit var binding: FragmentProfileEditBinding
     private lateinit var userDB: DatabaseReference
     private var userId = ""
 
-    private lateinit var userProfileUri: Uri
+    private var userProfileUri: Uri? = null
     private lateinit var userStorage: StorageReference
     private var isProfileClicked = false
     private var imageLink: String = ""
@@ -39,44 +43,21 @@ class ProfileEditFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        if (isAdded) {
-            context = requireContext()
-        }
         binding = FragmentProfileEditBinding.inflate(inflater, container, false)
-
         userDB = FirebaseDatabase.getInstance().reference
-
         userStorage = FirebaseStorage.getInstance().reference
 
         requireArguments().getString("id")?.let {
-
             userId = it
             getUserById(it)
-
         }
 
         binding.saveBtn.setOnClickListener {
-
             if (isProfileClicked && userProfileUri != null) {
-                uploadImage(userProfileUri)
+                uploadImage(userProfileUri!!)
+            } else {
+                updateUserProfile()
             }
-
-            var userMap: MutableMap<String, Any> = mutableMapOf()
-
-            userMap["userName"] = binding.userName.text.toString().trim()
-            userMap["userBio"] = binding.userBio.text.toString().trim()
-
-            userDB.child(DBNODES.USER).child(userId).updateChildren(userMap).addOnCompleteListener {
-                if (it.isSuccessful) {
-                    Toast.makeText(context, "Successfully Updated!", Toast.LENGTH_SHORT)
-                        .show()
-                    findNavController().popBackStack(R.id.profileFragment, false)
-                } else {
-                    Toast.makeText(context, "${it.exception?.message}", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            }
-
         }
 
         binding.userImage.setOnClickListener {
@@ -88,101 +69,115 @@ class ProfileEditFragment : Fragment() {
     }
 
     private fun uploadImage(userProfileUri: Uri) {
-        var profileStorage: StorageReference =
-            userStorage.child("Images").child(userId).child("Profile-Images")
-
-        profileStorage.putFile(userProfileUri).addOnCompleteListener {
-            if (it.isSuccessful) {
-                profileStorage.downloadUrl.addOnSuccessListener { data ->
-                    imageLink = data.toString()
-                    profileUpdateWithImage(imageLink)
-                    Toast.makeText(context, "Profile Picture Uploaded", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            } else {
-                Toast.makeText(context, "${it.exception?.message}", Toast.LENGTH_SHORT)
-                    .show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val profileStorage = userStorage.child("Images").child(userId).child("Profile-Images")
+                profileStorage.putFile(userProfileUri).await()
+                val downloadUrl = profileStorage.downloadUrl.await()
+                imageLink = downloadUrl.toString()
+                profileUpdateWithImage(imageLink)
+                showToast("Profile Picture Uploaded")
+            } catch (e: Exception) {
+                showError("Failed to upload profile picture: ${e.message}")
             }
         }
     }
 
     private fun profileUpdateWithImage(imageLink: String) {
-        var userMap: MutableMap<String, Any> = mutableMapOf()
-        userMap["userName"] = binding.userName.text.toString().trim()
-        userMap["userBio"] = binding.userBio.text.toString().trim()
-        userMap["userImage"] = imageLink
+        val userMap = mutableMapOf<String, Any>(
+            "userName" to binding.userName.text.toString().trim(),
+            "userBio" to binding.userBio.text.toString().trim(),
+            "userImage" to imageLink
+        )
 
-        userDB.child(DBNODES.USER).child(userId).updateChildren(userMap).addOnCompleteListener {
-            if (it.isSuccessful) {
-                Toast.makeText(context, "Successfully Updated", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "${it.exception?.message}", Toast.LENGTH_SHORT)
-                    .show()
-            }
-        }
+        updateUserProfile(userMap)
     }
 
     private fun pickProfileImage() {
         ImagePicker.with(this)
-            .crop()                    //Crop image(Optional), Check Customization for more option
-            .compress(1024)            //Final image size will be less than 1 MB(Optional)
-            .maxResultSize(
-                1080, 1080
-            )    //Final image resolution will be less than 1080 x 1080(Optional)
+            .crop()
+            .compress(1024)
+            .maxResultSize(1080, 1080)
             .createIntent { intent ->
                 startForProfileImageResult.launch(intent)
             }
     }
 
-    private val startForProfileImageResult =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
-            val resultCode = result.resultCode
-            val data = result.data
-            when (resultCode) {
-                Activity.RESULT_OK -> {
-                    //Image Uri will not be null for RESULT_OK
-                    data?.data.let {
-                        if (it != null) {
-                            userProfileUri = it
-                        }
-                        binding.userImage.setImageURI(it)
-                    }
-                }
-
-                ImagePicker.RESULT_ERROR -> {
-                    Toast.makeText(context, ImagePicker.getError(data), Toast.LENGTH_SHORT)
-                        .show()
-                }
-
-                else -> {
-                    Toast.makeText(context, "Task Cancelled", Toast.LENGTH_SHORT).show()
+    private val startForProfileImageResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        when (result.resultCode) {
+            Activity.RESULT_OK -> {
+                result.data?.data?.let {
+                    userProfileUri = it
+                    binding.userImage.setImageURI(it)
                 }
             }
+            ImagePicker.RESULT_ERROR -> {
+                showError(ImagePicker.getError(result.data))
+            }
+            else -> {
+                showError("Task Cancelled")
+            }
         }
+    }
 
-
-    private fun getUserById(it: String) {
-
-        userDB.child(DBNODES.USER).child(it).addValueEventListener(
-            object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.getValue(User::class.java)?.let {
-                        binding.apply {
-                            userName.setText(it.userName)
-                            userEmail.setText(it.userEmail)
-                            userBio.setText(it.userBio)
-                            Glide.with(context).load(it.userImage)
+    private fun getUserById(userId: String) {
+        userDB.child(DBNODES.USER).child(userId).addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                snapshot.getValue(User::class.java)?.let {
+                    binding.apply {
+                        userName.setText(it.userName)
+                        userEmail.setText(it.userEmail)
+                        userBio.setText(it.userBio)
+                        context?.let { ctx ->
+                            Glide.with(ctx).load(it.userImage)
                                 .placeholder(R.drawable.image_place_holder).into(userImage)
                         }
                     }
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                }
-
             }
-        )
 
+            override fun onCancelled(error: DatabaseError) {
+                showError("Failed to retrieve user data: ${error.message}")
+            }
+        })
     }
 
+    private fun updateUserProfile(userMap: Map<String, Any> = mapOf(
+        "userName" to binding.userName.text.toString().trim(),
+        "userBio" to binding.userBio.text.toString().trim()
+    )) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    userDB.child(DBNODES.USER).child(userId).updateChildren(userMap).await()
+                }
+                showToast("Successfully Updated!")
+                findNavController().popBackStack(R.id.profileFragment, false)
+            } catch (e: Exception) {
+                showError("Failed to update profile: ${e.message}")
+            }
+        }
+    }
+
+    private fun showToast(message: String) {
+        if (isAdded) {
+            lifecycleScope.launch {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun showError(message: String) {
+        if (isAdded) {
+            lifecycleScope.launch {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 }

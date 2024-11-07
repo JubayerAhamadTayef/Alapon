@@ -24,4 +24,8 @@
     <string name="i_am_an_android_developer">I am an Android Developer.</string>
     <string name="enter_your_bio_here">Enter Your Bio Here</string>
     <string name="update">Update</string>
+    <string name="design_by">Design By</string>
+    <string name="user_name_txt">User Name</string>
+    <string name="user_email_txt">User Email</string>
+    <string name="type_your_message_here">Type your message here...</string>
 </resources>
